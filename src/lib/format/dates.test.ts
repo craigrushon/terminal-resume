@@ -38,6 +38,7 @@ describe('formatRange', () => {
   });
 
   it('separates with U+2013, not a hyphen', () => {
-    expect(formatRange('2015-09', '2018-05').charCodeAt(8)).toBe(0x2013);
+    // RED fix: originally charCodeAt(8), an off-by-one in the hand-derived index ('Sep 2015' is 8 chars, then a space).
+    expect(formatRange('2015-09', '2018-05').split(' ')).toEqual(['Sep', '2015', '\u2013', 'May', '2018']);
   });
 });
