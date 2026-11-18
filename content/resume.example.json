@@ -1,0 +1,89 @@
+{
+  "basics": {
+    "name": "Alex Example",
+    "label": "Senior Software Engineer",
+    "summary": "Backend-leaning full-stack engineer who builds reliable product systems and AI-assisted developer tooling.",
+    "summaryVerbose": "Backend-leaning full-stack engineer with a decade of shipping product systems: payments, internal tools and data pipelines. Lately focused on AI-assisted developer workflows, where an orchestrator hands real tickets to specialised agents with human approval gates, measured cost and test-first guardrails.",
+    "location": { "city": "Montréal", "region": "QC", "country": "CA" },
+    "email": "alex@example.com",
+    "url": "https://example.com",
+    "profiles": [
+      { "network": "GitHub", "username": "alex-example", "url": "https://github.com/alex-example" },
+      { "network": "LinkedIn", "username": "alex-example", "url": "https://www.linkedin.com/in/alex-example" }
+    ]
+  },
+  "work": [
+    {
+      "name": "Example Payments Co.",
+      "position": "Senior Software Engineer",
+      "url": "https://example.com/payments",
+      "startDate": "2022-03",
+      "summary": "Own the payout reconciliation service and the internal tools used by the operations team.",
+      "highlights": [
+        "Cut payout reconciliation time from hours to minutes by moving matching into an idempotent job pipeline",
+        "Led the migration of money values from floats to integer cents across 40 endpoints",
+        "Introduced characterization tests before refactors; zero money regressions in two years"
+      ],
+      "highlightsVerbose": [
+        "Designed the dead-letter and replay flow so failed matches are retried safely and visible to operations",
+        "Mentored three engineers through their first on-call rotations",
+        "Built an agent workflow that drafts test plans for tickets, reviewed by a human before any code is written"
+      ],
+      "stack": ["TypeScript", "Node.js", "PostgreSQL", "React"]
+    },
+    {
+      "name": "Sample Learning Platform",
+      "position": "Software Developer",
+      "startDate": "2018-06",
+      "endDate": "2022-02",
+      "summary": "Built course commerce and team-permission features for a learning platform.",
+      "highlights": [
+        "Shipped team pages with role-based permissions used by 2,000+ organisations",
+        "Rebuilt the checkout tax calculation with exhaustive tests across 12 regions"
+      ],
+      "highlightsVerbose": ["Moved support-escalated bugs into a weekly triage that halved repeat tickets"],
+      "stack": ["Ruby on Rails", "React", "MySQL"]
+    },
+    {
+      "name": "Demo Support Team",
+      "position": "Support Engineer",
+      "startDate": "2015-09",
+      "endDate": "2018-05",
+      "summary": "Resolved technical escalations and built the scripts that became the team's first internal tools.",
+      "highlights": ["Automated the five most common account fixes, saving roughly ten hours a week"],
+      "stack": ["Python", "SQL"]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Property ROI Calculator",
+      "description": "Real-estate ROI calculator with mortgage, HELOC and cash financing.",
+      "descriptionVerbose": "Next.js app that models cash flow, cash-on-cash return and appreciation for rental properties, with characterization tests pinning the financial maths before each refactor.",
+      "repo": "https://github.com/alex-example/property-roi",
+      "highlights": ["Pinned the ROI maths with independently recomputed characterization tests"],
+      "stack": ["Next.js", "TypeScript", "Prisma", "Vitest"]
+    },
+    {
+      "name": "Agent workflow",
+      "description": "Orchestrator plus specialised subagents that take real tickets from plan to reviewed pull request.",
+      "repo": "https://github.com/alex-example/agent-workflow",
+      "highlights": ["Three merged pull requests at under one dollar each, with human approval gates"],
+      "stack": ["TypeScript", "LLM agents", "Linear API"]
+    }
+  ],
+  "skills": [
+    { "name": "Languages", "keywords": ["TypeScript", "Ruby", "Python", "SQL"] },
+    { "name": "Backend", "keywords": ["Node.js", "Rails", "PostgreSQL", "Event-driven pipelines"] },
+    { "name": "Frontend", "keywords": ["React", "Next.js", "Astro"] },
+    { "name": "Practices", "keywords": ["Test-first development", "Characterization testing", "AI-assisted workflows"] }
+  ],
+  "education": [
+    {
+      "institution": "Example University",
+      "area": "Computer Science",
+      "studyType": "Bachelor of Science",
+      "startDate": "2011-09",
+      "endDate": "2015-05"
+    }
+  ]
+}

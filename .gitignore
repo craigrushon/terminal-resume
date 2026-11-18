@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.astro/
+*.log
+.DS_Store
+
+# Real personal content stays out of git (see docs/spec.md §3)
+content/resume.json
+# Generated at build time from content
+public/resume.pdf

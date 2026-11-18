@@ -19,7 +19,7 @@ A personal resume site at `craigrushon.com`. It opens as a terminal with a blink
 | Framework | **Astro** (static output) | Content-first. Plain HTML by default, so it's fast and SEO-friendly. |
 | Interactivity | **React island** for the terminal only (`client:idle`) | JavaScript is shipped only for the interactive part, and it shows React skills. |
 | Language | TypeScript, `strict` | |
-| Content | Astro content collection with a zod schema | Content is validated at build time. A typo breaks the build, not the page. |
+| Content | A zod-validated loader module (`src/lib/resume/`) | Content is validated at build time. A typo breaks the build, not the page. *Changed from an Astro content collection in milestone 1:* a plain module is usable unchanged by Vitest and the PDF build script. |
 | Styling | Plain CSS + CSS custom properties (design tokens) | Small, and leaves room for themes later. |
 | Tests | Vitest (unit), plus React Testing Library and jsdom (component) | Same tooling as the ROI app. |
 | Package manager | pnpm. Node 22 LTS target (the sandbox runs 24) | |
@@ -126,7 +126,8 @@ The `-v`/`--verbose` flag overrides the detail toggle for that one command.
 ## 7. Architecture
 ```
 src/
-  content/config.ts            # zod schema + collection (loads resume.json or the example)
+  lib/resume/schema.ts         # zod schema (strict) + parseResume
+  lib/resume/source.ts         # loads content/resume.json if present, else the example
   lib/
     terminal/
       parse.ts                 # "cat experience -v" → { cmd, args, flags }   (pure)

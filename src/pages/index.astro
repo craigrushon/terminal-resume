@@ -1,0 +1,26 @@
+---
+import { isExampleContent, resume } from '../lib/resume/source';
+import '../styles/tokens.css';
+
+const { basics } = resume;
+const title = `${basics.name}: ${basics.label}`;
+---
+<!doctype html>
+<html lang="en" data-theme="modern">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={basics.summary} />
+    <link rel="canonical" href={new URL('/', Astro.site)} />
+    {isExampleContent && <meta name="robots" content="noindex" />}
+  </head>
+  <body>
+    <main>
+      <h1>{basics.name}</h1>
+      <p class="label">{basics.label}</p>
+      <p>{basics.summary}</p>
+      <p class="muted">Scaffold (milestone 1). Terminal and resume views arrive in milestones 3–4.</p>
+    </main>
+  </body>
+</html>
