@@ -107,6 +107,8 @@ visitor@craigrushon:~$ █
 
 The `-v`/`--verbose` flag overrides the detail toggle for that one command.
 
+**`cat` fallback (decision 2026-11-18):** `cat` resolves the path from the current directory first. If nothing is found, it also tries `~/resume/<path>`, so `cat experience` works straight from `~`. Unknown names still error. Tab completion stays strict (current directory only).
+
 **Keyboard:** Enter runs the command. ↑/↓ moves through history. **Tab** completes commands and paths, or lists the options if ambiguous. Ctrl+L clears. Ctrl+C cancels the current line. Clicking anywhere in the terminal focuses the input.
 
 ### 6a. Themes (v1: two)
