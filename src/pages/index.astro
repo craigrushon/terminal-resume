@@ -4,9 +4,11 @@ import { prepaint } from '../lib/prepaint';
 import { Terminal } from '../components/Terminal';
 import { Toggles } from '../components/Toggles';
 import ResumeView from '../components/ResumeView.astro';
+import '../styles/themes.css';
 import '../styles/tokens.css';
 import '../styles/terminal.css';
 import '../styles/views.css';
+import '../styles/print.css';
 
 const { basics } = resume;
 const title = `${basics.name}: ${basics.label}`;
@@ -28,7 +30,10 @@ const title = `${basics.name}: ${basics.label}`;
         <h1>{basics.name}</h1>
         <p class="label">{basics.label}</p>
       </div>
-      <Toggles client:load />
+      <div class="header-actions">
+        <Toggles client:load />
+        <a class="download-link" href="/resume.pdf" download>Download PDF</a>
+      </div>
     </header>
     <main>
       <section class="terminal-view" aria-label="Terminal">

@@ -119,7 +119,7 @@ The `-v`/`--verbose` flag overrides the detail toggle for that one command.
 
 ### 6b. PDF resume (v1)
 - Generated **from the same content file** at build time, so the PDF can never disagree with the site. Output: `/resume.pdf` (built from the example content until the real `resume.json` exists). The PDF is a clean single-column layout, not themed, and uses concise detail by default.
-- **Approach:** `@react-pdf/renderer` in a build script (pure Node, no headless browser). That works in this sandbox, where a headless browser may not run.
+- **Approach:** `@react-pdf/renderer` (pure Node, no headless browser) behind a **prerendered Astro endpoint**, `src/pages/resume.pdf.ts`. Astro writes it to `dist/resume.pdf` at build time and serves it in dev, using the same content loader as the pages. *Changed in milestone 5 from a separate `scripts/build-pdf.ts`: one pipeline, no extra TypeScript runner.*
 - Plus a **print stylesheet** for the Resume view, so "Print / Save as PDF" in the browser also looks right.
 - A test checks that the PDF builds and contains the name and every work entry. The text is extracted from the PDF to check this.
 
@@ -148,7 +148,7 @@ src/
   styles/tokens.css            # spacing, fonts, sizes
   styles/themes.css            # [data-theme=classic|modern] colour variables
   styles/print.css             # black-on-white print layout
-scripts/build-pdf.ts           # runs before `astro build`, writes public/resume.pdf
+  pages/resume.pdf.ts          # prerendered endpoint → dist/resume.pdf
 ```
 **Effects vs state (decided after the milestone 2 review):** `run()` returns new `state` *and* `effects`. Effects are the only trigger for anything outside the terminal (persisting prefs, switching view, setting the theme on `<html>`, opening links, downloads, clearing). State mirrors detail/theme only so the terminal can render its own output. This prevents double persistence.
 

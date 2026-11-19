@@ -1,0 +1,38 @@
+/* Theme colour variables (spec §6a). A new theme = one new block. All text pairs meet 4.5:1 (see themes test). */
+:root,
+[data-theme="modern"] {
+  --bg: #1e1e2e;
+  --fg: #cdd6f4;
+  --muted: #a6adc8;
+  --accent: #89b4fa;
+  --error: #f38ba8;
+  --glow: none;
+}
+
+/* Green-on-black phosphor */
+[data-theme="classic"] {
+  --bg: #000000;
+  --fg: #33ff33;
+  --muted: #2bc92b;
+  --accent: #66ff66;
+  --error: #ff6666;
+  --glow: 0 0 4px rgb(51 255 51 / 0.45);
+}
+
+[data-theme="classic"] .terminal,
+[data-theme="classic"] .resume {
+  text-shadow: var(--glow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="classic"] .terminal,
+  [data-theme="classic"] .resume {
+    text-shadow: none;
+  }
+}
+
+/* Classic is monospace everywhere, including the Resume view. */
+[data-theme="classic"] body,
+[data-theme="classic"] .resume {
+  font-family: var(--font-mono);
+}

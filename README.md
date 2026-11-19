@@ -8,7 +8,7 @@ Type 'help' to see commands, or try: cat experience
 visitor@craigrushon:~$ █
 ```
 
-> **Status: work in progress.** The terminal and the resume view work. Themes and the PDF download are next (see [Roadmap](#roadmap)). The content in this repo is a fictional person, "Alex Example".
+> **Status: work in progress.** The terminal, resume view, themes and PDF download work. Polish (accessibility audit, link previews) is next (see [Roadmap](#roadmap)). The content in this repo is a fictional person, "Alex Example".
 
 ## Features
 **Working now**
@@ -18,6 +18,8 @@ visitor@craigrushon:~$ █
 - Tappable suggested commands on phones.
 - A plain **Resume view** with Terminal ↔ Resume and Concise ↔ Verbose toggles. Your choice is kept in the URL (shareable) and remembered. Phones open the Resume view by default.
 - Works without JavaScript: the resume is always in the HTML, and a tiny inline script picks the view **before the first paint**, so there's no flash.
+- Two themes: **Modern** (dark) and **Classic** (green-on-black phosphor), switchable with a toggle or `theme classic`. A test checks that every text colour in both themes meets WCAG 4.5:1 contrast.
+- **PDF resume** at `/resume.pdf`, generated at build time from the same content (concise detail, one page), plus a print stylesheet so "Print / Save as PDF" also looks right.
 - Accessible: the output is a polite live region, the input is labelled, focus is visible, and the cursor stops blinking when reduced motion is requested.
 
 **Roadmap**
@@ -25,7 +27,7 @@ visitor@craigrushon:~$ █
 2. ~~Terminal core logic (pure functions)~~ ✅
 3. ~~React terminal island~~ ✅
 4. ~~Resume view and toggles, view chosen before first paint, works without JavaScript~~ ✅
-5. Two themes (classic green-on-black, modern dark) and a PDF generated from the same content
+5. ~~Two themes and a PDF generated from the same content~~ ✅
 6. Accessibility audit, SEO and link previews, Lighthouse ≥ 95
 7. Real content and deployment
 
