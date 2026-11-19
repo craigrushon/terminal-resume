@@ -45,19 +45,41 @@ export function ogCard(resume: Resume): OgNode {
   );
 }
 
-function font(weight: 400 | 700): Buffer {
-  const pkg = createRequire(import.meta.url).resolve('@fontsource/jetbrains-mono/package.json');
-  return readFileSync(join(dirname(pkg), 'files', `jetbrains-mono-latin-${weight}-normal.woff`));
+export interface OgFontFile {
+  weight: 400 | 700;
+  subset: 'latin' | 'latin-ext';
+  file: string;
+}
+
+export const OG_FONT_FILES: readonly OgFontFile[] = [400, 700].flatMap((weight) =>
+  (['latin', 'latin-ext'] as const).map((subset) => ({
+    weight: weight as 400 | 700,
+    subset,
+    file: `jetbrains-mono-${subset}-${weight}-normal.woff`,
+  })),
+);
+
+// The package's `exports` map doesn't expose package.json, so resolve the (exported) main entry and use its directory.
+function fontsDir(): string {
+  const entry = createRequire(join(process.cwd(), 'noop.js')).resolve('@fontsource/jetbrains-mono');
+  return join(dirname(entry), 'files');
+}
+
+function loadFonts() {
+  const dir = fontsDir();
+  return OG_FONT_FILES.map((f) => ({
+    name: 'JetBrains Mono',
+    data: readFileSync(join(dir, f.file)),
+    weight: f.weight,
+    style: 'normal' as const,
+  }));
 }
 
 export async function renderOgImage(resume: Resume): Promise<Uint8Array> {
   const svg = await satori(ogCard(resume) as unknown as Parameters<typeof satori>[0], {
     width: 1200,
     height: 630,
-    fonts: [
-      { name: 'JetBrains Mono', data: font(400), weight: 400, style: 'normal' },
-      { name: 'JetBrains Mono', data: font(700), weight: 700, style: 'normal' },
-    ],
+    fonts: loadFonts(),
   });
   return new Uint8Array(new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } }).render().asPng());
 }

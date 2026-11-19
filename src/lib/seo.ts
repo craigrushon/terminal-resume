@@ -34,11 +34,13 @@ const MAX_DESCRIPTION = 160;
 
 function describe(summary: string): string {
   const text = summary.replace(/\s+/g, ' ').trim();
-  if (text.length <= MAX_DESCRIPTION) return text;
-  const cut = text.slice(0, MAX_DESCRIPTION - 1);
+  // Work in code points so a surrogate pair is never split.
+  const chars = Array.from(text);
+  if (chars.length <= MAX_DESCRIPTION) return text;
+  const cut = chars.slice(0, MAX_DESCRIPTION - 1);
   const space = cut.lastIndexOf(' ');
-  const head = space > 0 && text[MAX_DESCRIPTION - 1] !== ' ' ? cut.slice(0, space) : cut;
-  return head.trimEnd() + '…';
+  const head = space > 0 && chars[MAX_DESCRIPTION - 1] !== ' ' ? cut.slice(0, space) : cut;
+  return head.join('').trimEnd() + '…';
 }
 
 export function pageMeta(resume: Resume, site: string | URL, opts: SeoOptions): PageMeta {
@@ -56,6 +58,11 @@ export function pageMeta(resume: Resume, site: string | URL, opts: SeoOptions): 
 export function personJsonLd(resume: Resume, site: string | URL): PersonJsonLd {
   const { name, label, summary, location, profiles } = resume.basics;
   const sameAs = profiles.map((p) => safeHref(p.url)).filter((u): u is string => u !== null && u.startsWith('https://'));
+  const address = {
+    ...(location.city ? { addressLocality: location.city } : {}),
+    ...(location.region ? { addressRegion: location.region } : {}),
+    ...(location.country ? { addressCountry: location.country } : {}),
+  };
   return {
     '@context': 'https://schema.org',
     '@type': 'Person',
@@ -64,12 +71,7 @@ export function personJsonLd(resume: Resume, site: string | URL): PersonJsonLd {
     description: summary,
     url: new URL('/', site).href,
     ...(sameAs.length > 0 ? { sameAs } : {}),
-    address: {
-      '@type': 'PostalAddress',
-      addressLocality: location.city,
-      addressRegion: location.region,
-      addressCountry: location.country,
-    },
+    ...(Object.keys(address).length > 0 ? { address: { '@type': 'PostalAddress' as const, ...address } } : {}),
   };
 }
 
@@ -82,6 +84,7 @@ const ESCAPES: Record<string, string> = {
 };
 
 export function serializeJsonLd(data: unknown): string {
+  if (data === undefined) throw new TypeError('serializeJsonLd: data must not be undefined');
   return JSON.stringify(data).replace(/[<>&\u2028\u2029]/g, (c) => ESCAPES[c] as string);
 }
 
