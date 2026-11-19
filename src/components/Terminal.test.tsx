@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import example from '../../content/resume.example.json';
 import { parseResume } from '../lib/resume/schema';
 import { Terminal } from './Terminal';
+import type { TerminalState } from '../lib/terminal/types';
 
 const resume = parseResume(example);
 const PROMPT = 'visitor@craigrushon:~$';
@@ -17,10 +18,10 @@ const SUMMARY_VERBOSE =
  * Layout contract: the log holds welcome lines, echo lines (ONE element each, text `${prompt} ${input}`)
  * and output blocks. The live prompt + input sit OUTSIDE the log.
  */
-function setup() {
+function setup(initialState?: Partial<TerminalState>) {
   const onEffect = vi.fn();
   const user = userEvent.setup();
-  render(<Terminal resume={resume} onEffect={onEffect} />);
+  render(<Terminal resume={resume} initialState={initialState} onEffect={onEffect} />);
   const input = screen.getByRole('textbox', { name: 'Terminal command' });
   const log = screen.getByRole('log', { name: 'Terminal output' });
   const run = async (command: string) => {
@@ -139,8 +140,9 @@ describe('Terminal', () => {
     expect(input).toHaveValue('');
   });
 
+  // RED fix: completion is strict to cwd (spec §6, decision B), so start in ~/resume.
   it('Tab completes a single match', async () => {
-    const { input, user } = setup();
+    const { input, user } = setup({ cwd: '~/resume' });
     await user.type(input, 'cat ex');
     await user.tab();
     expect(input).toHaveValue('cat experience ');

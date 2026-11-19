@@ -177,7 +177,7 @@ scripts/build-pdf.ts           # runs before `astro build`, writes public/resume
 |---|---|---|
 | **Unit (most)** | `parse` (quotes, flags, extra spaces, empty), `fs` path resolution (`..`, `~`, unknown), each command's blocks for the example resume, `complete`, `suggest`, concise/verbose selection, date formatting, content schema rejects unknown/private fields | ~40 |
 | **Unit (pre-paint logic)** | View/theme resolution: URL beats `localStorage` beats viewport default (phone → Resume, desktop → Terminal), invalid values fall back | ~8 |
-| **Component (few)** | Terminal: typing `help` + Enter renders the help list. ↑ recalls history. Tab completes `cat ex` → `cat experience`. `theme classic` sets `data-theme`. Toggles switch the view and update the URL. | ~7 |
+| **Component (few)** | Terminal: typing `help` + Enter renders the help list. ↑ recalls history. Tab completes `cat ex` → `cat experience` (from `~/resume`; completion is strict). `theme classic` sets `data-theme`. Toggles switch the view and update the URL. | ~7 |
 | **Build check (PDF)** | PDF builds from the example content; extracted text contains the name and every work entry | 1–2 |
 | **Build check** | `astro check` (types) + `astro build` succeeds with the example content | CI |
 | **E2E (later, maybe)** | One Playwright smoke test (load → `help` → toggle to Resume) once deployed. Decision deferred to CRA-58. | 0–1 |
