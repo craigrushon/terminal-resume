@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { parseResume } from '../lib/resume/schema';
-import { ogCard, renderOgImage } from './render';
+import { OG_FONT_FILES, ogCard, renderOgImage } from './render';
 
 const resume = parseResume(JSON.parse(readFileSync(new URL('../../content/resume.example.json', import.meta.url), 'utf8')));
 
@@ -20,5 +20,14 @@ describe('renderOgImage', () => {
     const view = new DataView(png.buffer, png.byteOffset, png.byteLength);
     expect(view.getUint32(16)).toBe(1200);
     expect(view.getUint32(20)).toBe(630);
+  });
+});
+
+describe('OG_FONT_FILES', () => {
+  it('covers latin and latin-ext for weights 400 and 700', () => {
+    for (const weight of [400, 700]) {
+      const subsets = OG_FONT_FILES.filter((f) => f.weight === weight).map((f) => f.subset).sort();
+      expect(subsets).toEqual(['latin', 'latin-ext']);
+    }
   });
 });

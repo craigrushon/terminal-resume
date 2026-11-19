@@ -28,6 +28,36 @@ describe('pageMeta', () => {
     expect(long[body.length]).toBe(' ');
   });
 
+  it('returns a summary of exactly 160 chars unchanged', () => {
+    const exact = ('abcd '.repeat(40)).slice(0, 159) + 'x';
+    expect(exact).toHaveLength(160);
+    expect(pageMeta(withSummary(exact), SITE, { isExample: false }).description).toBe(exact);
+  });
+
+  it('truncates a 161-char summary with spaces to <=160 chars ending in an ellipsis', () => {
+    const text = ('abcd '.repeat(40)).slice(0, 160) + 'y';
+    expect(text).toHaveLength(161);
+    const { description } = pageMeta(withSummary(text), SITE, { isExample: false });
+    expect(description.length).toBeLessThanOrEqual(160);
+    expect(description.endsWith('…')).toBe(true);
+  });
+
+  it('hard-cuts a single 200-char word to exactly 160 chars ending in an ellipsis', () => {
+    const { description } = pageMeta(withSummary('a'.repeat(200)), SITE, { isExample: false });
+    expect(description).toBe('a'.repeat(159) + '…');
+    expect(description).toHaveLength(160);
+  });
+
+  it('never leaves a lone surrogate when the cut falls inside an emoji', () => {
+    const lone = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
+    for (let pad = 150; pad <= 160; pad++) {
+      const text = 'a'.repeat(pad) + '😀'.repeat(20);
+      const { description } = pageMeta(withSummary(text), SITE, { isExample: false });
+      expect(description).not.toMatch(lone);
+      expect(description.endsWith('…')).toBe(true);
+    }
+  });
+
   it('collapses whitespace in the description', () => {
     const { description } = pageMeta(withSummary('  Builds \n\t  things   well. '), SITE, { isExample: false });
     expect(description).toBe('Builds things well.');
@@ -100,11 +130,17 @@ describe('serializeJsonLd', () => {
     expect(out).toContain('\\u2029');
   });
 
+  it('throws a clear TypeError for undefined input', () => {
+    expect(() => serializeJsonLd(undefined)).toThrow(TypeError);
+  });
+
   it('round-trips through JSON.parse', () => {
     const data = { a: '</script> & <b> \u2028 \u2029', n: [1, { k: 'v' }] };
     expect(JSON.parse(serializeJsonLd(data))).toEqual(data);
   });
 });
+
+// personJsonLd "omits address when location is empty" is skipped: schema.ts requires city, region and country.
 
 describe('robotsTxt', () => {
   it('disallows everything for example content, with no sitemap', () => {
