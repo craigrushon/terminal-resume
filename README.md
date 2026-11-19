@@ -20,6 +20,7 @@ visitor@craigrushon:~$ █
 - Works without JavaScript: the resume is always in the HTML, and a tiny inline script picks the view **before the first paint**, so there's no flash.
 - Two themes: **Modern** (dark) and **Classic** (green-on-black phosphor), switchable in ⚙ settings or with `theme classic`. A test checks that every text colour in both themes meets WCAG 4.5:1 contrast.
 - **PDF resume** at `/resume.pdf`, generated at build time from the same content (concise detail, one page), plus a print stylesheet so "Print / Save as PDF" also looks right.
+- **Link previews and SEO:** a generated Open Graph image (`/og.png`, a terminal-style card), Open Graph and Twitter tags, schema.org JSON-LD (no email or phone), and `robots.txt`. While the example content is used, the page is `noindex`. Built-output checks (`pnpm test:dist`) verify the tags and run axe-core on the built page.
 - Accessible: the output is a polite live region, the input is labelled, focus is visible, and the cursor stops blinking when reduced motion is requested.
 
 **Roadmap**
@@ -28,7 +29,7 @@ visitor@craigrushon:~$ █
 3. ~~React terminal island~~ ✅
 4. ~~Resume view and toggles, view chosen before first paint, works without JavaScript~~ ✅
 5. ~~Two themes and a PDF generated from the same content~~ ✅
-6. Accessibility audit, SEO and link previews, Lighthouse ≥ 95
+6. ~~SEO and link previews, automated accessibility checks~~ ✅ · Lighthouse ≥ 95 (manual run pending)
 7. Real content and deployment
 
 ## How it's built
@@ -53,6 +54,7 @@ Requires Node 22+ and pnpm 9.
 | `pnpm test` | Unit and component tests (Vitest, Testing Library) |
 | `pnpm check` | Type check (`astro check`) |
 | `pnpm build` | Static build to `dist/` |
+| `pnpm test:dist` | Checks on the built output: head tags, JSON-LD, files, axe (run after `pnpm build`) |
 
 ## License
 [MIT](LICENSE)

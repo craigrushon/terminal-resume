@@ -184,6 +184,23 @@ src/
 - JSON-LD `Person` schema generated from `basics` (name, job title, profile links). Contact info is limited to what's in the content.
 - `robots.txt`, `sitemap.xml` (Astro integration).
 
+### 9a. Milestone 6 contract (2026-11-19)
+**Pure module `src/lib/seo.ts`** (all head content comes from here; `index.astro` only renders it):
+- `pageMeta(resume, site, { isExample })` → `{ title, description, canonical, ogImage, ogImageAlt, noindex }`.
+  - `title` = `` `${name}: ${label}` ``. `description` = `basics.summary`, whitespace collapsed, at most **160** characters; if longer, cut at the last word boundary and end with `…` (total ≤ 160).
+  - `canonical` = `new URL('/', site).href`; `ogImage` = absolute `…/og.png`; `ogImageAlt` = `` `${name}, ${label}` ``; `noindex` = `isExample`.
+- `personJsonLd(resume, site)` → schema.org `Person`: `@context` `https://schema.org`, `@type` `Person`, `name`, `jobTitle` (label), `description` (summary), `url` (canonical), `sameAs` (profile URLs that pass `safeHref()` and are `https:`; key omitted if empty), `address` (`PostalAddress` with `addressLocality`/`addressRegion`/`addressCountry`). **Never** includes `email` or `telephone` (fewer scrapers; contact stays behind links).
+- `serializeJsonLd(data)` → `JSON.stringify` with `<`, `>`, `&`, U+2028, U+2029 escaped as `\uXXXX`, so content can never close the `<script>` tag. Round-trips through `JSON.parse`.
+- `robotsTxt(site, { isExample })` → example content: `User-agent: *` + `Disallow: /`. Real content: `User-agent: *` + `Allow: /` + `Sitemap: <site>/sitemap-index.xml`. Ends with a newline.
+
+**OG image:** `src/og/render.ts` `renderOgImage(resume): Promise<Uint8Array>`, a **1200×630 PNG** terminal-style card (prompt line, name, label) rendered with `satori` + `@resvg/resvg-js` and a bundled font from `@fontsource/jetbrains-mono` (no network at build). `ogCard(resume)` returns the satori element tree (pure, testable). Served by the prerendered endpoint `src/pages/og.png.ts` (`Content-Type: image/png`). Robots via prerendered `src/pages/robots.txt.ts` (`text/plain; charset=utf-8`).
+
+**Head tags in `index.astro`:** title, description, canonical, `robots noindex` when example, `og:type=website`, `og:site_name`, `og:title`, `og:description`, `og:url`, `og:image`, `og:image:width=1200`, `og:image:height=630`, `og:image:alt`, `twitter:card=summary_large_image`, `twitter:title`, `twitter:description`, `twitter:image`, `theme-color`, an SVG favicon (`/favicon.svg`, avoids a 404 in Lighthouse), and one `<script type="application/ld+json">`.
+
+**Built-output checks** (`test/dist/*.test.ts`, separate config `vitest.dist.config.ts`, `pnpm test:dist`, run in CI **after** `pnpm build`): `dist/index.html` has every tag above with the expected values and exactly one parseable JSON-LD block; `dist/robots.txt`, `dist/og.png` (PNG, 1200×630), `dist/favicon.svg` exist; and **axe-core** reports no violations on `dist/index.html` in jsdom (colour contrast is excluded there; it's covered by the theme contrast test and Lighthouse).
+
+**Lighthouse:** run manually on `pnpm preview` (desktop + mobile). Target ≥ 95 in all four categories; SEO is expected to flag `noindex` while the example content is used.
+
 ## 10. Test plan (test-first, per CRA-58 thinking)
 | Layer | What | Approx. count |
 |---|---|---|
@@ -202,7 +219,7 @@ Rules: exact assertions, no snapshots of large DOM trees, the example resume as 
 3. **Terminal island:** rendering, input, history, keys, mobile chips.
 4. **Resume view + toggles:** static view, pre-paint view/theme script, URL/`localStorage` state, no-JS fallback.
 5. **Themes + PDF:** classic and modern themes, print stylesheet, build-time PDF + download command.
-6. **Polish:** accessibility pass (both themes), SEO/OG, Lighthouse check, README (architecture + "use it for your own site").
+6. **Polish:** accessibility pass (both themes), SEO/OG, Lighthouse check, README (architecture + "use it for your own site"). Contract: §9a.
 7. **Later:** real content, deploy to `craigrushon.com`, decide on public repo. Phase 2 = CRA-64.
 
 ## 12. Out of scope (v1)
