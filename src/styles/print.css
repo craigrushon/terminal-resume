@@ -1,0 +1,42 @@
+/* Print / Save as PDF: the Resume view, black on white, always (spec §6a, §6b). */
+@media print {
+  .terminal-view,
+  .toggles,
+  .chips,
+  .download-link {
+    display: none !important;
+  }
+
+  html[data-view] .resume-view,
+  html[data-view='terminal'] .resume-view {
+    display: block !important;
+  }
+
+  /* Concise unless the visitor chose verbose. */
+  html:not([data-detail='verbose']) .verbose-only { display: none !important; }
+  html[data-detail='verbose'] .concise-only { display: none !important; }
+
+  html,
+  body,
+  .resume,
+  .resume * {
+    background: #fff !important;
+    color: #000 !important;
+    text-shadow: none !important;
+    font-family: Georgia, 'Times New Roman', serif !important;
+  }
+
+  body { font-size: 11pt; line-height: 1.4; }
+  .site-header, main { max-width: none; padding: 0; }
+  .site-header { padding-top: 0; display: block; }
+  .site-header h1 { font-size: 20pt; font-family: Georgia, serif; }
+  .resume { max-width: none; margin: 0; font-size: 11pt; line-height: 1.4; }
+  .resume h2 { margin-top: 14pt; font-size: 13pt; border-bottom: 1px solid #000; break-after: avoid; }
+  .resume h3 { font-size: 11.5pt; break-after: avoid; }
+  .resume .entry { break-inside: avoid; }
+  .resume .resume-meta { font-size: 10pt; }
+  .label { color: #000 !important; font-family: inherit; }
+
+  a { text-decoration: underline; }
+  a[href^='http']::after { content: ' (' attr(href) ')'; font-size: 0.9em; overflow-wrap: anywhere; }
+}

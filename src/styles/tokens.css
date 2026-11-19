@@ -1,4 +1,4 @@
-/* Design tokens (spec §6a). Theme colours move to themes.css in milestone 5. */
+/* Design tokens (spec §6a). Colours live in themes.css. */
 :root {
   --font-mono: ui-monospace, 'SFMono-Regular', 'JetBrains Mono', Menlo, Consolas, monospace;
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -6,11 +6,6 @@
   --space-2: 0.5rem;
   --space-4: 1rem;
   --space-8: 2rem;
-  --bg: #1e1e2e;
-  --fg: #cdd6f4;
-  --muted: #a6adc8;
-  --accent: #89b4fa;
-  --error: #f38ba8; /* ~7.5:1 on --bg */
 }
 
 body {
