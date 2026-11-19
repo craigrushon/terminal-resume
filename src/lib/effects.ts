@@ -13,6 +13,8 @@ export interface EffectEnv {
   download: (href: string) => void;
   /** window.dispatchEvent */
   dispatch: (event: Event) => void;
+  /** Mirrors a pref into the URL query (browserEnv: searchParams.set + history.replaceState). */
+  setParam: (key: 'view' | 'detail' | 'theme', value: string) => void;
 }
 
 /**
@@ -87,6 +89,11 @@ export function browserEnv(): EffectEnv {
     },
     dispatch: (event) => {
       window.dispatchEvent(event);
+    },
+    setParam: (key, value) => {
+      const url = new URL(window.location.href);
+      url.searchParams.set(key, value);
+      window.history.replaceState(window.history.state, '', url);
     },
   };
 }

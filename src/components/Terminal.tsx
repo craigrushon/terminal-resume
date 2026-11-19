@@ -25,7 +25,7 @@ type NewEntry =
   | { kind: 'options'; text: string }
   | { kind: 'block'; block: Block };
 
-const CHIPS = ['help', 'whoami', 'cat experience', 'cat projects', 'open linkedin', 'resume'] as const;
+export const CHIPS = ['help', 'whoami', 'cat experience', 'cat projects', 'open linkedin', 'resume'] as const;
 
 const defaultOnEffect = (effect: Effect): void => applyEffect(effect, browserEnv());
 
