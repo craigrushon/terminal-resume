@@ -1,9 +1,10 @@
 /* Print / Save as PDF: the Resume view, black on white, always (spec §6a, §6b). */
 @media print {
   .terminal-view,
-  .toggles,
-  .chips,
-  .download-link {
+  .titlebar,
+  .resume-toolbar,
+  #settings,
+  .chips {
     display: none !important;
   }
 
@@ -15,6 +16,8 @@
   /* Concise unless the visitor chose verbose. */
   html:not([data-detail='verbose']) .verbose-only { display: none !important; }
   html[data-detail='verbose'] .concise-only { display: none !important; }
+
+  .window { border: 0 !important; border-radius: 0 !important; }
 
   html,
   body,

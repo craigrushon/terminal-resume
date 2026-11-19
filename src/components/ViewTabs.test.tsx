@@ -54,6 +54,21 @@ describe('ViewTabs', () => {
     expect(onEffect).not.toHaveBeenCalled();
   });
 
+  // Review: modifier + arrow is browser navigation (Alt+← back, Cmd+← on macOS); the tabs must not swallow it.
+  it.each(['{Alt>}{ArrowRight}{/Alt}', '{Meta>}{ArrowLeft}{/Meta}', '{Control>}{ArrowRight}{/Control}'])(
+    'ignores %s (no selection change, default not prevented)',
+    async (keys) => {
+      const { onEffect, user, terminal } = setup({ initial: 'terminal' });
+      terminal.focus();
+      const notPrevented: boolean[] = [];
+      terminal.addEventListener('keydown', (event) => queueMicrotask(() => notPrevented.push(!event.defaultPrevented)));
+      await user.keyboard(keys);
+      expect(terminal).toHaveAttribute('aria-selected', 'true');
+      expect(onEffect.mock.calls).toEqual([]);
+      expect(notPrevented.filter((value) => value === false)).toEqual([]);
+    },
+  );
+
   it('ArrowRight from Terminal selects and focuses Resume', async () => {
     const { onEffect, user, terminal, resume } = setup({ initial: 'terminal' });
     terminal.focus();

@@ -2,7 +2,9 @@
 import { isExampleContent, resume } from '../lib/resume/source';
 import { prepaint } from '../lib/prepaint';
 import { Terminal } from '../components/Terminal';
-import { Toggles } from '../components/Toggles';
+import { ViewTabs } from '../components/ViewTabs';
+import { DetailSwitch } from '../components/DetailSwitch';
+import { ThemeSwitch } from '../components/ThemeSwitch';
 import ResumeView from '../components/ResumeView.astro';
 import '../styles/themes.css';
 import '../styles/tokens.css';
@@ -26,22 +28,40 @@ const title = `${basics.name}: ${basics.label}`;
   </head>
   <body>
     <header class="site-header">
-      <div class="site-title">
-        <h1>{basics.name}</h1>
-        <p class="label">{basics.label}</p>
-      </div>
-      <div class="header-actions">
-        <Toggles client:load />
-        <a class="download-link" href="/resume.pdf" download>Download PDF</a>
-      </div>
+      <h1>{basics.name}</h1>
+      <p class="label">{basics.label}</p>
     </header>
     <main>
-      <section class="terminal-view" aria-label="Terminal">
-        <Terminal client:idle resume={resume} />
-      </section>
-      <section class="resume-view" aria-label="Resume">
-        <ResumeView resume={resume} />
-      </section>
+      <div class="window">
+        <div class="titlebar">
+          <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <ViewTabs client:load />
+          <button type="button" class="settings-button" popovertarget="settings" aria-label="Settings">
+            <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <circle cx="8" cy="8" r="2.25" />
+              <path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4" />
+            </svg>
+          </button>
+          <div id="settings" popover>
+            <ThemeSwitch client:load />
+          </div>
+        </div>
+        <section id="panel-terminal" role="tabpanel" aria-labelledby="tab-terminal" class="terminal-view">
+          <Terminal client:idle resume={resume} />
+        </section>
+        <section id="panel-resume" role="tabpanel" aria-labelledby="tab-resume" class="resume-view">
+          <div class="resume-toolbar">
+            <DetailSwitch client:load />
+            <a class="pdf-link" href="/resume.pdf" download>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <path d="M8 2v8M4.5 6.75L8 10.25l3.5-3.5M3 13.5h10" />
+              </svg>
+              <span>PDF</span>
+            </a>
+          </div>
+          <ResumeView resume={resume} />
+        </section>
+      </div>
     </main>
   </body>
 </html>
