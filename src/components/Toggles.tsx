@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { PREFS_EVENT, applyEffect, browserEnv } from '../lib/effects';
-import type { Detail, Effect, View } from '../lib/terminal/types';
+import type { Detail, Effect, Theme, View } from '../lib/terminal/types';
 import { DETAILS, VIEWS, oneOf } from '../lib/terminal/values';
 
 export interface TogglesProps {
-  initial?: { view: View; detail: Detail };
+  initial?: { view: View; detail: Detail; theme?: Theme };
   /** Default: (e) => applyEffect(e, browserEnv()) */
   onEffect?: (effect: Effect) => void;
 }

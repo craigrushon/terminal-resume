@@ -106,3 +106,41 @@ describe('Toggles hydration', () => {
     }
   });
 });
+
+describe('Toggles theme group', () => {
+  const initial = { view: 'terminal', detail: 'concise' } as const;
+  afterEach(() => {
+    delete document.documentElement.dataset.theme;
+  });
+
+  it('renders a Theme group with Modern checked by default', () => {
+    render(<Toggles onEffect={vi.fn()} initial={initial} />);
+    const theme = screen.getByRole('group', { name: 'Theme' });
+    expect(within(theme).getByRole('radio', { name: 'Modern' })).toBeChecked();
+    expect(within(theme).getByRole('radio', { name: 'Classic' })).not.toBeChecked();
+  });
+
+  it('reads <html data-theme> after mount', () => {
+    document.documentElement.dataset.theme = 'classic';
+    render(<Toggles onEffect={vi.fn()} />);
+    const theme = screen.getByRole('group', { name: 'Theme' });
+    expect(within(theme).getByRole('radio', { name: 'Classic' })).toBeChecked();
+  });
+
+  it('emits set-theme when Classic is chosen', async () => {
+    const onEffect = vi.fn();
+    render(<Toggles onEffect={onEffect} initial={initial} />);
+    await userEvent.setup().click(within(screen.getByRole('group', { name: 'Theme' })).getByRole('radio', { name: 'Classic' }));
+    expect(onEffect.mock.calls).toEqual([[{ type: 'set-theme', theme: 'classic' }]]);
+  });
+
+  it('checks Classic when a PREFS_EVENT announces it, without emitting', () => {
+    const onEffect = vi.fn();
+    render(<Toggles onEffect={onEffect} initial={initial} />);
+    act(() => {
+      window.dispatchEvent(new CustomEvent(PREFS_EVENT, { detail: { theme: 'classic' } }));
+    });
+    expect(within(screen.getByRole('group', { name: 'Theme' })).getByRole('radio', { name: 'Classic' })).toBeChecked();
+    expect(onEffect).not.toHaveBeenCalled();
+  });
+});
