@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "description": "A resume site that opens as a terminal: Astro + a React island, built test-first.",
+  "license": "MIT",
+  "packageManager": "pnpm@9.15.9",
   "engines": {
     "node": ">=22"
   },

@@ -21,11 +21,19 @@ body {
   line-height: 1.5;
 }
 
+.site-header,
 main {
   max-width: 48rem;
   margin: 0 auto;
-  padding: var(--space-8) var(--space-4);
+  padding: 0 var(--space-4);
 }
+
+.site-header { padding-top: var(--space-8); }
+.site-header h1 { margin: 0; font-family: var(--font-mono); font-size: 1.5rem; }
+.site-header .label { margin: var(--space-1) 0 var(--space-4); }
+
+main { padding-bottom: var(--space-8); }
+main a { color: var(--accent); }
 
 .label { color: var(--accent); font-family: var(--font-mono); }
 .muted { color: var(--muted); }

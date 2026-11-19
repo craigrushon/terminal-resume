@@ -18,14 +18,21 @@ const title = `${basics.name}: ${basics.label}`;
     {isExampleContent && <meta name="robots" content="noindex" />}
   </head>
   <body>
-    <main>
+    <header class="site-header">
       <h1>{basics.name}</h1>
       <p class="label">{basics.label}</p>
-      <p>{basics.summary}</p>
+    </header>
+    <main>
+      <Terminal client:idle resume={resume} />
+      <noscript>
+        <p>{basics.summary}</p>
+        <p class="muted">The interactive terminal needs JavaScript. You can also find me here:</p>
+        <ul>
+          {basics.profiles.map((profile) => (
+            <li><a href={profile.url} rel="noopener noreferrer">{profile.network}</a></li>
+          ))}
+        </ul>
+      </noscript>
     </main>
-    <Terminal client:idle resume={resume} />
-    <noscript>
-      <p class="muted">The interactive terminal needs JavaScript. A plain resume view is coming in milestone 4.</p>
-    </noscript>
   </body>
 </html>

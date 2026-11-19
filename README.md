@@ -1,20 +1,54 @@
-# Terminal resume site
+# terminal-resume
 
-A personal resume site that opens as a terminal (`try: help`), with a toggle to a normal rendered resume, concise/verbose detail, two themes and a PDF download. Spec: [`docs/spec.md`](docs/spec.md). Linear: CRA-63.
+A resume site that opens as a terminal. Visitors can type `help`, `cd resume` or `cat experience`, or switch to a plain rendered resume with one click. Built with **Astro** and a **React island**, test-first.
 
-**Stack:** Astro (static) + a React island for the terminal, TypeScript strict, zod, Vitest.
+```
+Alex Example: Senior Software Engineer
+Type 'help' to see commands, or try: cat experience
+visitor@craigrushon:~$ █
+```
 
-## Content
-- `content/resume.example.json`: fictional "Alex Example", committed, used for dev and tests.
-- `content/resume.json`: your real content, **gitignored**. Used automatically when present.
-- The schema is strict: unknown fields (phone, address, salary…) fail the build. Only put LinkedIn-level information here; the deployed site is public.
+> **Status: work in progress.** The terminal works. The resume view, themes and PDF download are next (see [Roadmap](#roadmap)). The content in this repo is a fictional person, "Alex Example".
 
-## Commands
-| | |
+## Features
+**Working now**
+- Commands: `help`, `whoami`, `ls`, `cd`, `pwd`, `cat`, `open`, `history`, `clear`, `theme`, `verbose` / `concise`, `download`, `resume`. Hidden extras exist.
+- Tab completion, ↑/↓ history, Ctrl+L to clear, Ctrl+C to cancel, "did you mean…?" suggestions.
+- `cat experience` works from anywhere (it falls back to `~/resume`). `-v` / `--verbose` shows more detail for one command.
+- Tappable suggested commands on phones.
+- Accessible: the output is a polite live region, the input is labelled, focus is visible, and the cursor stops blinking when reduced motion is requested.
+
+**Roadmap**
+1. ~~Scaffold, strict content schema~~ ✅
+2. ~~Terminal core logic (pure functions)~~ ✅
+3. ~~React terminal island~~ ✅
+4. Resume view and toggles (Terminal ↔ Resume, Concise ↔ Verbose), view chosen before first paint, works without JavaScript
+5. Two themes (classic green-on-black, modern dark) and a PDF generated from the same content
+6. Accessibility audit, SEO and link previews, Lighthouse ≥ 95
+7. Real content and deployment
+
+## How it's built
+- **One content file, many views.** `content/resume.json` follows a strict subset of [JSON Resume](https://jsonresume.org). A zod schema rejects unknown fields, so private data such as a phone number, address or salary can't reach the public site by accident.
+- **Commands are pure functions.** `run(input, state, resume)` returns structured output blocks and effects, never HTML strings. The React island only renders blocks and applies effects. That keeps the logic easy to test exactly and safe to render.
+- **Links are allow-listed.** Every href passes `safeHref()` (https, plain `mailto:`, or `/resume.pdf`), even though the schema already validates content.
+- **Test-first, with locked tests.** Each milestone starts with a commit of failing tests (`test: RED …`). The implementation (`feat: GREEN …`) must pass them without editing them. A wrong test is fixed in its own labelled commit, never silently.
+- **Built with an AI agent workflow.** The red and green phases were carried out by specialised agents (worker → tester → reviewer) with human approval gates. The commit messages record who did what. See the [spec](docs/spec.md) for the design decisions.
+
+## Use it for your own site
+1. Copy `content/resume.example.json` to `content/resume.json` and fill it in. That file is gitignored, so decide yourself whether to commit it. Everything in it ends up on a public website.
+2. Change the site URL in `astro.config.mjs` and the prompt in `src/components/Terminal.tsx`.
+3. `pnpm build` and deploy `dist/` to any static host.
+
+## Development
+Requires Node 22+ and pnpm 9.
+
+| Command | |
 |---|---|
-| `pnpm dev` | Dev server |
-| `pnpm test` | Unit + component tests (Vitest) |
+| `pnpm install` | Install dependencies |
+| `pnpm dev` | Dev server at http://localhost:4321 |
+| `pnpm test` | Unit and component tests (Vitest, Testing Library) |
 | `pnpm check` | Type check (`astro check`) |
 | `pnpm build` | Static build to `dist/` |
 
-Requires Node 22+ and pnpm.
+## License
+[MIT](LICENSE)
