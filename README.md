@@ -8,7 +8,7 @@ Type 'help' to see commands, or try: cat experience
 visitor@craigrushon:~$ █
 ```
 
-> **Status: work in progress.** The terminal works. The resume view, themes and PDF download are next (see [Roadmap](#roadmap)). The content in this repo is a fictional person, "Alex Example".
+> **Status: work in progress.** The terminal and the resume view work. Themes and the PDF download are next (see [Roadmap](#roadmap)). The content in this repo is a fictional person, "Alex Example".
 
 ## Features
 **Working now**
@@ -16,13 +16,15 @@ visitor@craigrushon:~$ █
 - Tab completion, ↑/↓ history, Ctrl+L to clear, Ctrl+C to cancel, "did you mean…?" suggestions.
 - `cat experience` works from anywhere (it falls back to `~/resume`). `-v` / `--verbose` shows more detail for one command.
 - Tappable suggested commands on phones.
+- A plain **Resume view** with Terminal ↔ Resume and Concise ↔ Verbose toggles. Your choice is kept in the URL (shareable) and remembered. Phones open the Resume view by default.
+- Works without JavaScript: the resume is always in the HTML, and a tiny inline script picks the view **before the first paint**, so there's no flash.
 - Accessible: the output is a polite live region, the input is labelled, focus is visible, and the cursor stops blinking when reduced motion is requested.
 
 **Roadmap**
 1. ~~Scaffold, strict content schema~~ ✅
 2. ~~Terminal core logic (pure functions)~~ ✅
 3. ~~React terminal island~~ ✅
-4. Resume view and toggles (Terminal ↔ Resume, Concise ↔ Verbose), view chosen before first paint, works without JavaScript
+4. ~~Resume view and toggles, view chosen before first paint, works without JavaScript~~ ✅
 5. Two themes (classic green-on-black, modern dark) and a PDF generated from the same content
 6. Accessibility audit, SEO and link previews, Lighthouse ≥ 95
 7. Real content and deployment
@@ -31,7 +33,7 @@ visitor@craigrushon:~$ █
 - **One content file, many views.** `content/resume.json` follows a strict subset of [JSON Resume](https://jsonresume.org). A zod schema rejects unknown fields, so private data such as a phone number, address or salary can't reach the public site by accident.
 - **Commands are pure functions.** `run(input, state, resume)` returns structured output blocks and effects, never HTML strings. The React island only renders blocks and applies effects. That keeps the logic easy to test exactly and safe to render.
 - **Links are allow-listed.** Every href passes `safeHref()` (https, plain `mailto:`, or `/resume.pdf`), even though the schema already validates content.
-- **Test-first, with locked tests.** Each milestone starts with a commit of failing tests (`test: RED …`). The implementation (`feat: GREEN …`) must pass them without editing them. A wrong test is fixed in its own labelled commit, never silently.
+- **Test-first, with locked tests.** Each milestone's pull request starts with a commit of failing tests (`test: RED …`). The implementation (`feat: GREEN …`) must pass them without editing them, and a wrong test is fixed in its own labelled commit. PRs are squash-merged, so every commit on `main` is green. (Milestones 2–3 predate that rule and show the red commits on `main`.)
 - **Built with an AI agent workflow.** The red and green phases were carried out by specialised agents (worker → tester → reviewer) with human approval gates. The commit messages record who did what. See the [spec](docs/spec.md) for the design decisions.
 
 ## Use it for your own site
