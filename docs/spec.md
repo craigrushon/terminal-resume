@@ -150,6 +150,10 @@ src/
   styles/print.css             # black-on-white print layout
 scripts/build-pdf.ts           # runs before `astro build`, writes public/resume.pdf
 ```
+**Effects vs state (decided after the milestone 2 review):** `run()` returns new `state` *and* `effects`. Effects are the only trigger for anything outside the terminal (persisting prefs, switching view, setting the theme on `<html>`, opening links, downloads, clearing). State mirrors detail/theme only so the terminal can render its own output. This prevents double persistence.
+
+**Link safety:** every href in a link block or effect passes `safeHref()` (https with a host, a plain `mailto:` address, or `/resume.pdf`). Unsafe links are dropped from `cat` output, and `open` refuses them with an error. This is defence in depth on top of the schema.
+
 **Key design choice:** commands return **structured output blocks** (`{ type: 'text' | 'heading' | 'list' | 'link' | 'error', ... }`), never HTML strings.
 - **Safe:** no `dangerouslySetInnerHTML`, so there's no injection risk even when content is user-edited.
 - **Testable:** exact assertions on data, not on DOM output.

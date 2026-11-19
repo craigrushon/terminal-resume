@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import example from '../../../content/resume.example.json';
 import { parseResume } from '../resume/schema';
-import { initialState, run } from './commands';
+import { COMMANDS, initialState, run } from './commands';
+import { complete } from './complete';
+import { safeHref } from './href';
+import type { Resume } from '../resume/schema';
 import type { Block, RunResult, TerminalState } from './types';
 
 const resume = parseResume(example);
@@ -166,6 +169,13 @@ describe('run: purity and history', () => {
 
   it('records unknown commands in history', () => {
     expect(exec('foo').state.history).toEqual(['foo']);
+  });
+
+  it('never mutates nested state (deep check)', () => {
+    const state = initialState({ cwd: '~/resume', history: ['help', 'ls'] });
+    const before = structuredClone(state);
+    for (const input of ['cd ..', 'verbose', 'theme classic', 'history', 'clear', 'foo']) run(input, state, resume);
+    expect(state).toEqual(before);
   });
 
   it('never mutates the state passed in', () => {
@@ -508,5 +518,75 @@ describe('run: clear, history, easter eggs, unknown', () => {
 
   it('the unknown-command message keeps the lowercased command', () => {
     expect(outputOf('FOO')).toEqual([{ type: 'error', text: "command not found: foo. Try 'help'." }]);
+  });
+});
+
+describe('hidden commands', () => {
+  it('COMMANDS lists only public commands (no exit or sudo)', () => {
+    expect(COMMANDS).toEqual([
+      'cat', 'cd', 'clear', 'concise', 'download', 'help', 'history', 'ls', 'open', 'pwd', 'resume', 'theme', 'verbose', 'whoami',
+    ]);
+  });
+
+  it.each(['exit', 'sudo'])('help never lists %s', (name) => {
+    const list = outputOf('help').find((block) => block.type === 'list');
+    const names = list?.type === 'list' ? list.items.map((item) => item.split(' ')[0]) : [];
+    expect(names).toHaveLength(14);
+    expect(names.includes(name)).toBe(false);
+  });
+
+  it.each(['e', 's', 'ex', 'su'])('completing %j never offers hidden commands', (line) => {
+    const { options, line: completed } = complete(line, initialState());
+    expect([...options, completed.trim()].some((value) => value === 'exit' || value === 'sudo')).toBe(false);
+  });
+});
+
+// Spec §7 / review of milestone 2: link hrefs must be safe even if content validation is bypassed.
+describe('href safety', () => {
+  const ALL_INPUTS = [
+    'help', 'whoami', 'whoami -v', 'ls', 'ls resume', 'pwd', 'cat README', 'history', 'download', 'theme', 'concise', 'verbose',
+    ...['experience', 'projects', 'skills', 'education', 'contact'].flatMap((s) => [`cat ${s}`, `cat ${s} -v`]),
+    ...['email', 'github', 'linkedin', 'resume.pdf'].map((t) => `open ${t}`),
+  ];
+
+  it('every link and open-url emitted for the example content is already safe', () => {
+    const hrefs = ALL_INPUTS.flatMap((input) => {
+      const { output, effects } = exec(input);
+      return [
+        ...output.flatMap((block) => (block.type === 'link' ? [block.href] : [])),
+        ...effects.flatMap((effect) => (effect.type === 'open-url' ? [effect.url] : effect.type === 'download' ? [effect.href] : [])),
+      ];
+    });
+    // projects 2+2, contact 3+3, open email/github/linkedin link+effect 3x2, open resume.pdf 1, download 1 = 18
+    expect(hrefs).toHaveLength(18);
+    expect(hrefs.filter((href) => safeHref(href) !== href)).toEqual([]);
+  });
+
+  // A typed Resume that skipped parseResume (e.g. a future loader bug) carrying a hostile URL.
+  const hostile: Resume = {
+    ...resume,
+    basics: {
+      ...resume.basics,
+      profiles: [{ network: 'GitHub', username: 'x', url: 'javascript:alert(1)' }, ...resume.basics.profiles.slice(1)],
+    },
+    projects: [{ ...resume.projects[0]!, repo: 'javascript:alert(2)' }],
+  };
+
+  it('cat contact drops a hostile profile link', () => {
+    expect(run('cat contact', initialState(), hostile).output).toEqual([
+      { type: 'link', label: 'Email', href: 'mailto:alex@example.com' },
+      { type: 'link', label: 'LinkedIn', href: 'https://www.linkedin.com/in/alex-example' },
+    ]);
+  });
+
+  it('cat projects drops a hostile repo link', () => {
+    const output = run('cat projects', initialState(), hostile).output;
+    expect(output.filter((block) => block.type === 'link')).toEqual([]);
+  });
+
+  it('open refuses a hostile URL with an error and no effect', () => {
+    const result = run('open github', initialState(), hostile);
+    expect(result.output).toEqual([{ type: 'error', text: 'open: github: link blocked (unsafe URL)' }]);
+    expect(result.effects).toEqual([]);
   });
 });

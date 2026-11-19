@@ -7,6 +7,14 @@ export type Block =
   | { type: 'list'; items: string[] }
   | { type: 'link'; label: string; href: string }
   | { type: 'error'; text: string };
+/**
+ * Side effects the UI must perform. Contract (spec §7, decided before milestone 3):
+ * - Effects are the ONLY trigger for anything outside the terminal: persisting prefs,
+ *   switching view, setting data-theme on <html>, opening URLs, downloads, clearing the screen.
+ * - TerminalState.detail/theme mirror the same values for the terminal's own rendering
+ *   (e.g. cat output detail). The island must never persist or apply prefs by diffing state.
+ * - Every href in a Block or Effect has passed safeHref (href.ts).
+ */
 export type Effect =
   | { type: 'set-view'; view: View }
   | { type: 'set-detail'; detail: Detail }

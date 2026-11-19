@@ -5,11 +5,11 @@ import { SECTION_NAMES, isDir, isFile, listDir, resolvePath, type SectionName } 
 import { parse } from './parse';
 import { suggest } from './suggest';
 import type { Block, Detail, Effect, RunResult, TerminalState } from './types';
-import { THEMES, oneOf } from './values';
+import { safeHref } from './href';
+import { PDF_HREF, THEMES, oneOf } from './values';
 
 const HOME = '~';
 const RESUME_DIR = '~/resume';
-const PDF_HREF = '/resume.pdf';
 const OPEN_TARGETS = ['email', 'github', 'linkedin', 'resume.pdf'] as const;
 const OPEN_HINT = `Try: ${OPEN_TARGETS.join(', ')}`;
 const README = 'Welcome. Use ls and cd to explore, cat <file> to read a section, and help to list commands.';
@@ -42,7 +42,11 @@ interface PublicCommand extends Command {
 }
 
 const text = (value: string): Block => ({ type: 'text', text: value });
-const link = (label: string, href: string): Block => ({ type: 'link', label, href });
+/** A link block, or nothing when the href fails the allow-list (see href.ts). */
+const safeLink = (label: string, href: string): Block[] => {
+  const allowed = safeHref(href);
+  return allowed === null ? [] : [{ type: 'link', label, href: allowed }];
+};
 const failure = (value: string): Outcome => ({ output: [{ type: 'error', text: value }] });
 
 const lastSegment = (path: string): string => path.split('/').at(-1) ?? path;
@@ -66,7 +70,7 @@ function renderProjects({ resume, detail }: Context): Block[] {
       text(detail === 'verbose' ? (project.descriptionVerbose ?? project.description) : project.description),
       { type: 'list', items: selectHighlights(project, detail) },
       text(`Stack: ${project.stack.join(', ')}`),
-      ...(href ? [link(href, href)] : []),
+      ...(href ? safeLink(href, href) : []),
     ];
   });
 }
@@ -86,8 +90,8 @@ function renderEducation({ resume }: Context): Block[] {
 function renderContact({ resume }: Context): Block[] {
   const { email, profiles } = resume.basics;
   return [
-    ...(email ? [link('Email', `mailto:${email}`)] : []),
-    ...profiles.map((profile) => link(profile.network, profile.url)),
+    ...(email ? safeLink('Email', `mailto:${email}`) : []),
+    ...profiles.flatMap((profile) => safeLink(profile.network, profile.url)),
   ];
 }
 
@@ -118,18 +122,20 @@ function downloadOutcome(): Outcome {
   return { output: [text('Downloading resume.pdf')], effects: [{ type: 'download', href: PDF_HREF }] };
 }
 
-function openLink(label: string, url: string): Outcome {
-  return { output: [link(label, url)], effects: [{ type: 'open-url', url }] };
+function openLink(target: string, label: string, url: string): Outcome {
+  const allowed = safeHref(url);
+  if (allowed === null) return failure(`open: ${target}: link blocked (unsafe URL)`);
+  return { output: [{ type: 'link', label, href: allowed }], effects: [{ type: 'open-url', url: allowed }] };
 }
 
 function openTarget(target: (typeof OPEN_TARGETS)[number], resume: Resume): Outcome {
   const { email, profiles } = resume.basics;
   if (target === 'resume.pdf') return downloadOutcome();
   if (target === 'email') {
-    return email ? openLink(email, `mailto:${email}`) : failure('open: email: not available in this resume');
+    return email ? openLink(target, email, `mailto:${email}`) : failure('open: email: not available in this resume');
   }
   const url = profiles.find((profile) => profile.network.toLowerCase() === target)?.url;
-  return url ? openLink(url, url) : failure(`open: ${target}: not available in this resume`);
+  return url ? openLink(target, url, url) : failure(`open: ${target}: not available in this resume`);
 }
 
 // ---- command table: single source for help, COMMANDS, completion and dispatch ----
