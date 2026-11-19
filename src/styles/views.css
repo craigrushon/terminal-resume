@@ -1,45 +1,17 @@
-/* View switching (spec §5). No JS => no data-view => resume shows, terminal and toggles hide. */
+/* View switching (spec §5). No JS => no data-view => resume shows, terminal and window chrome hide. */
 html:not([data-view='terminal']) .terminal-view { display: none; }
 html[data-view='terminal'] .resume-view { display: none; }
-html:not([data-view]) .toggles { display: none; }
 
 /* Detail level */
 html:not([data-detail='verbose']) .verbose-only { display: none; }
 html[data-detail='verbose'] .concise-only { display: none; }
 
-/* Header + segmented toggles */
-.site-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--space-4);
-}
-
-.toggles { display: flex; flex-wrap: wrap; gap: var(--space-4); margin-bottom: var(--space-4); }
-
-.toggles fieldset { display: inline-flex; align-items: center; margin: 0; padding: 0; border: 0; min-width: 0; }
-
-.toggles legend {
-  float: left;
-  padding: 0 var(--space-2) 0 0;
-  color: var(--muted);
-  font-size: 0.85rem;
-}
-
-.toggles label { position: relative; display: inline-block; }
-
-.toggles input {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.toggles label span {
+/* Segmented radio switches (Detail, Theme) */
+.switch { display: inline-flex; align-items: center; margin: 0; padding: 0; border: 0; min-width: 0; }
+.switch legend { float: left; padding: 0 var(--space-2) 0 0; color: var(--muted); font-size: 0.85rem; }
+.switch label { position: relative; display: inline-block; }
+.switch input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.switch label span {
   display: inline-block;
   padding: var(--space-2) var(--space-4);
   min-height: 1.25rem;
@@ -47,13 +19,139 @@ html[data-detail='verbose'] .concise-only { display: none; }
   font-size: 0.9rem;
   border: 1px solid var(--muted);
 }
+.switch label:first-of-type span { border-radius: 0.375rem 0 0 0.375rem; }
+.switch label:last-of-type span { border-radius: 0 0.375rem 0.375rem 0; margin-left: -1px; }
+.switch input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 600; }
+.switch input:not(:checked):hover + span { border-color: var(--accent); color: var(--accent); }
+.switch input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; position: relative; z-index: 1; }
 
-.toggles label:first-of-type span { border-radius: 0.375rem 0 0 0.375rem; }
-.toggles label:last-of-type span { border-radius: 0 0.375rem 0.375rem 0; margin-left: -1px; }
+/* Terminal-app window (spec §5) */
+.window { margin-top: var(--space-4); border: 1px solid var(--muted); border-radius: 0.5rem; background: var(--bg); }
 
-.toggles input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 600; }
-.toggles input:not(:checked):hover + span { border-color: var(--accent); color: var(--accent); }
-.toggles input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; position: relative; z-index: 1; }
+.titlebar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-1) var(--space-2) 0;
+  border-bottom: 1px solid var(--muted);
+}
+
+.dots { display: inline-flex; gap: var(--space-2); padding: 0 var(--space-2); }
+.dots i { width: 0.7rem; height: 0.7rem; border: 1px solid var(--muted); border-radius: 50%; }
+
+.view-tabs { display: flex; gap: var(--space-1); align-self: flex-end; }
+.view-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: -1px;
+  padding: var(--space-2) var(--space-4);
+  color: var(--muted);
+  background: transparent;
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 0.375rem 0.375rem 0 0;
+  cursor: pointer;
+}
+.view-tabs button:hover { color: var(--accent); }
+/* Selected state follows <html data-view> (set before first paint), so phones that start on Resume never
+   flash a selected Terminal tab before hydration. effects.ts keeps data-view and aria-selected in sync. */
+html[data-view='terminal'] #tab-terminal,
+html[data-view='resume'] #tab-resume {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+  font-weight: 600;
+}
+.view-tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.settings-button {
+  anchor-name: --settings-button;
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 var(--space-1) auto;
+  padding: var(--space-2);
+  color: var(--fg);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  cursor: pointer;
+}
+.settings-button:hover { color: var(--accent); border-color: var(--muted); }
+.settings-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* The popover renders in the top layer, so it is positioned against the viewport, not the title bar.
+   Fallback: the top-right corner. With CSS anchor positioning: just below the gear button. */
+#settings {
+  position: fixed;
+  inset: auto;
+  top: var(--space-8);
+  right: var(--space-4);
+  margin: 0;
+  padding: var(--space-4);
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--accent);
+  border-radius: 0.5rem;
+}
+@supports (position-anchor: --a) {
+  #settings {
+    position-anchor: --settings-button;
+    top: calc(anchor(bottom) + var(--space-1));
+    right: anchor(right);
+    position-try-fallbacks: flip-block;
+  }
+}
+
+/* No Popover API: the gear can't open anything, so show the Theme switch inline in the title bar. */
+@supports not selector(:popover-open) {
+  .settings-button { display: none; }
+  #settings { display: block; position: static; margin-left: auto; padding: var(--space-1) var(--space-2); border: 0; }
+}
+
+/* Resume toolbar */
+.resume-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--muted);
+}
+.resume-view .resume { padding: 0 var(--space-4) var(--space-4); }
+
+.pdf-link {
+  margin-left: auto; /* stays right-aligned, also when the Detail switch is hidden (no JS) */
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  color: var(--accent);
+  font-size: 0.9rem;
+  border: 1px solid var(--accent);
+  border-radius: 0.375rem;
+  text-decoration: none;
+}
+.pdf-link:hover { background: var(--accent); color: var(--bg); }
+.pdf-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* No JS (no data-view): tabs, settings and the Detail switch can't work, so hide them. */
+html:not([data-view]) .titlebar,
+html:not([data-view]) .resume-toolbar .switch { display: none; }
+
+/* Phones: no dots, tabs fill the bar, toolbar wraps */
+@media (max-width: 639px) {
+  .dots { display: none; }
+  .titlebar { gap: var(--space-2); }
+  .view-tabs { flex: 1; }
+  .view-tabs button { flex: 1; justify-content: center; padding-inline: var(--space-2); }
+  .settings-button { margin-left: 0; }
+}
 
 /* Resume view typography */
 .resume {
@@ -82,17 +180,3 @@ html[data-detail='verbose'] .concise-only { display: none; }
 .resume .resume-meta { color: var(--muted); font-size: 0.9rem; }
 .resume a { color: var(--accent); }
 .resume a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-/* Header actions: toggles + PDF link (the link stays visible without JS) */
-.header-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); margin-bottom: var(--space-4); }
-.header-actions .toggles { margin-bottom: 0; }
-.download-link {
-  padding: var(--space-2) var(--space-4);
-  color: var(--accent);
-  font-size: 0.9rem;
-  border: 1px solid var(--accent);
-  border-radius: 0.375rem;
-  text-decoration: none;
-}
-.download-link:hover { background: var(--accent); color: var(--bg); }
-.download-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

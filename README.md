@@ -16,9 +16,9 @@ visitor@craigrushon:~$ █
 - Tab completion, ↑/↓ history, Ctrl+L to clear, Ctrl+C to cancel, "did you mean…?" suggestions.
 - `cat experience` works from anywhere (it falls back to `~/resume`). `-v` / `--verbose` shows more detail for one command.
 - Tappable suggested commands on phones.
-- A plain **Resume view** with Terminal ↔ Resume and Concise ↔ Verbose toggles. Your choice is kept in the URL (shareable) and remembered. Phones open the Resume view by default.
+- A terminal-style **window** with **Terminal | Resume** tabs (keyboard: ←/→/Home/End). A **⚙ settings** popover holds the Theme; the Resume tab has a toolbar with a **Concise | Detailed** switch and a **PDF** link. Your choice is kept in the URL (shareable) and remembered. Phones open the Resume tab by default.
 - Works without JavaScript: the resume is always in the HTML, and a tiny inline script picks the view **before the first paint**, so there's no flash.
-- Two themes: **Modern** (dark) and **Classic** (green-on-black phosphor), switchable with a toggle or `theme classic`. A test checks that every text colour in both themes meets WCAG 4.5:1 contrast.
+- Two themes: **Modern** (dark) and **Classic** (green-on-black phosphor), switchable in ⚙ settings or with `theme classic`. A test checks that every text colour in both themes meets WCAG 4.5:1 contrast.
 - **PDF resume** at `/resume.pdf`, generated at build time from the same content (concise detail, one page), plus a print stylesheet so "Print / Save as PDF" also looks right.
 - Accessible: the output is a polite live region, the input is labelled, focus is visible, and the cursor stops blinking when reduced motion is requested.
 
