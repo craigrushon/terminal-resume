@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import type { Resume } from '../lib/resume/schema';
-import { applyEffect, browserEnv } from '../lib/effects';
+import { PREFS_EVENT, applyEffect, browserEnv } from '../lib/effects';
 import { initialState, run } from '../lib/terminal/commands';
 import { complete } from '../lib/terminal/complete';
+import { DETAILS, THEMES, oneOf } from '../lib/terminal/values';
 import type { Block, Effect, TerminalState } from '../lib/terminal/types';
 import { TerminalBlock } from './TerminalBlock';
 
@@ -25,7 +26,7 @@ type NewEntry =
   | { kind: 'options'; text: string }
   | { kind: 'block'; block: Block };
 
-const CHIPS = ['help', 'whoami', 'cat experience', 'cat projects', 'open linkedin', 'resume'] as const;
+export const CHIPS = ['help', 'whoami', 'cat experience', 'cat projects', 'open linkedin', 'resume'] as const;
 
 const defaultOnEffect = (effect: Effect): void => applyEffect(effect, browserEnv());
 
@@ -37,7 +38,14 @@ export function Terminal({ resume, initialState: overrides, onEffect = defaultOn
   const nextId = useRef(0);
   const withIds = (items: NewEntry[]): Entry[] => items.map((item) => ({ ...item, id: nextId.current++ }) as Entry);
 
+  // First render matches the server render; the pre-paint detail on <html> is applied after hydration.
   const [state, setState] = useState(() => initialState(overrides));
+  useEffect(() => {
+    if (overrides?.detail) return;
+    const detail = oneOf(DETAILS, document.documentElement.dataset.detail);
+    if (detail) setState((previous) => ({ ...previous, detail }));
+    // Mount only: later changes arrive through PREFS_EVENT.
+  }, []);
   const [entries, setEntries] = useState<Entry[]>(() =>
     withIds([
       { kind: 'welcome', text: `${resume.basics.name}: ${resume.basics.label}` },
@@ -50,6 +58,18 @@ export function Terminal({ resume, initialState: overrides, onEffect = defaultOn
   const [draft, setDraft] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const logRef = useRef<HTMLDivElement>(null);
+
+  // Mirror prefs changed elsewhere (toggles) into state only; never emit effects from here.
+  useEffect(() => {
+    const onPrefs = (event: Event): void => {
+      const change = (event as CustomEvent<{ detail?: string; theme?: string }>).detail;
+      const detail = oneOf(DETAILS, change?.detail);
+      const theme = oneOf(THEMES, change?.theme);
+      if (detail || theme) setState((previous) => ({ ...previous, ...(detail && { detail }), ...(theme && { theme }) }));
+    };
+    window.addEventListener(PREFS_EVENT, onPrefs);
+    return () => window.removeEventListener(PREFS_EVENT, onPrefs);
+  }, []);
 
   useEffect(() => {
     const log = logRef.current;

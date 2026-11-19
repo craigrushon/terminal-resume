@@ -1,8 +1,12 @@
 ---
 import { isExampleContent, resume } from '../lib/resume/source';
+import { prepaint } from '../lib/prepaint';
 import { Terminal } from '../components/Terminal';
+import { Toggles } from '../components/Toggles';
+import ResumeView from '../components/ResumeView.astro';
 import '../styles/tokens.css';
 import '../styles/terminal.css';
+import '../styles/views.css';
 
 const { basics } = resume;
 const title = `${basics.name}: ${basics.label}`;
@@ -12,6 +16,7 @@ const title = `${basics.name}: ${basics.label}`;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline set:html={`(${prepaint.toString()})({search: location.search, storage: (function(){try{return localStorage}catch(e){return null}})(), width: innerWidth, root: document.documentElement})`} />
     <title>{title}</title>
     <meta name="description" content={basics.summary} />
     <link rel="canonical" href={new URL('/', Astro.site)} />
@@ -19,20 +24,19 @@ const title = `${basics.name}: ${basics.label}`;
   </head>
   <body>
     <header class="site-header">
-      <h1>{basics.name}</h1>
-      <p class="label">{basics.label}</p>
+      <div class="site-title">
+        <h1>{basics.name}</h1>
+        <p class="label">{basics.label}</p>
+      </div>
+      <Toggles client:load />
     </header>
     <main>
-      <Terminal client:idle resume={resume} />
-      <noscript>
-        <p>{basics.summary}</p>
-        <p class="muted">The interactive terminal needs JavaScript. You can also find me here:</p>
-        <ul>
-          {basics.profiles.map((profile) => (
-            <li><a href={profile.url} rel="noopener noreferrer">{profile.network}</a></li>
-          ))}
-        </ul>
-      </noscript>
+      <section class="terminal-view" aria-label="Terminal">
+        <Terminal client:idle resume={resume} />
+      </section>
+      <section class="resume-view" aria-label="Resume">
+        <ResumeView resume={resume} />
+      </section>
     </main>
   </body>
 </html>

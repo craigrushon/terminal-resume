@@ -18,7 +18,7 @@ export function TerminalBlock({ block }: { block: Block }): React.JSX.Element {
     case 'link':
       return (
         <p>
-          {block.label}{' '}
+          {block.label === block.href ? null : `${block.label} `}
           <a href={block.href} target="_blank" rel="noopener noreferrer">
             {block.href}
           </a>

@@ -1,10 +1,12 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import example from '../../content/resume.example.json';
 import { parseResume } from '../lib/resume/schema';
-import { Terminal } from './Terminal';
+import { PREFS_EVENT } from '../lib/effects';
+import { COMMANDS } from '../lib/terminal/commands';
+import { CHIPS, Terminal } from './Terminal';
 import type { TerminalState } from '../lib/terminal/types';
 
 const resume = parseResume(example);
@@ -230,5 +232,46 @@ describe('Terminal', () => {
     await run('verbose');
     await run('whoami');
     expect(within(log).getByText(SUMMARY_VERBOSE)).toBeInTheDocument();
+  });
+
+  it('starts with the detail from document.documentElement.dataset.detail', async () => {
+    document.documentElement.dataset.detail = 'verbose';
+    try {
+      const { log, run } = setup();
+      await run('whoami');
+      expect(within(log).getByText(SUMMARY_VERBOSE)).toBeInTheDocument();
+    } finally {
+      delete document.documentElement.dataset.detail;
+    }
+  });
+
+  it('syncs detail from a PREFS_EVENT without emitting an effect', async () => {
+    const { log, onEffect, run } = setup();
+    act(() => {
+      window.dispatchEvent(new CustomEvent(PREFS_EVENT, { detail: { detail: 'verbose' } }));
+    });
+    await run('whoami');
+    expect(within(log).getByText(SUMMARY_VERBOSE)).toBeInTheDocument();
+    expect(onEffect).not.toHaveBeenCalled();
+  });
+
+  it('renders only the anchor when a link label equals its href', async () => {
+    const { log, run } = setup();
+    await run('open linkedin');
+    const link = within(log).getByRole('link', { name: 'https://www.linkedin.com/in/alex-example' });
+    expect(link.parentElement?.textContent).toBe('https://www.linkedin.com/in/alex-example');
+  });
+
+  it('keeps "label href" when a link label differs from its href', async () => {
+    const { log, run } = setup();
+    await run('cat contact');
+    const link = within(log).getByRole('link', { name: 'mailto:alex@example.com' });
+    expect(link.parentElement?.textContent).toBe('Email mailto:alex@example.com');
+  });
+
+  it('suggests only runnable commands', () => {
+    expect(CHIPS.map((chip) => chip.split(' ')[0])).toEqual(
+      CHIPS.map((chip) => COMMANDS.find((command) => command === chip.split(' ')[0])),
+    );
   });
 });

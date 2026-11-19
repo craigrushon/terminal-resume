@@ -13,6 +13,8 @@ export interface EffectEnv {
   download: (href: string) => void;
   /** window.dispatchEvent */
   dispatch: (event: Event) => void;
+  /** Mirrors a pref into the URL query (browserEnv: searchParams.set + history.replaceState). */
+  setParam: (key: 'view' | 'detail' | 'theme', value: string) => void;
 }
 
 /**
@@ -57,6 +59,11 @@ function setPref(env: EffectEnv, key: keyof typeof PREF_KEYS, value: string): vo
   } catch {
     // Storage can throw (private mode, quota); the pref still applies for this page.
   }
+  try {
+    env.setParam(key, value);
+  } catch {
+    // URL mirroring is best effort (e.g. sandboxed contexts can throw on replaceState).
+  }
   env.dispatch(new CustomEvent(PREFS_EVENT, { detail: { [key]: value } }));
 }
 
@@ -87,6 +94,11 @@ export function browserEnv(): EffectEnv {
     },
     dispatch: (event) => {
       window.dispatchEvent(event);
+    },
+    setParam: (key, value) => {
+      const url = new URL(window.location.href);
+      url.searchParams.set(key, value);
+      window.history.replaceState(window.history.state, '', url);
     },
   };
 }

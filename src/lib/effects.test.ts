@@ -9,6 +9,7 @@ function makeEnv() {
     open: vi.fn(),
     download: vi.fn(),
     dispatch: vi.fn(),
+    setParam: vi.fn(),
   } satisfies EffectEnv;
   return env;
 }
@@ -70,5 +71,20 @@ describe('applyEffect', () => {
     expect(env.dispatch).not.toHaveBeenCalled();
     expect(env.open).not.toHaveBeenCalled();
     expect(env.download).not.toHaveBeenCalled();
+  });
+
+  it('set-view mirrors the pref into the URL via setParam', () => {
+    const env = makeEnv();
+    applyEffect({ type: 'set-view', view: 'resume' }, env);
+    expect(env.setParam).toHaveBeenCalledTimes(1);
+    expect(env.setParam).toHaveBeenCalledWith('view', 'resume');
+  });
+
+  it('open-url, download and clear never call setParam', () => {
+    const env = makeEnv();
+    applyEffect({ type: 'open-url', url: 'https://github.com/alex-example' }, env);
+    applyEffect({ type: 'download', href: '/resume.pdf' }, env);
+    applyEffect({ type: 'clear' }, env);
+    expect(env.setParam).not.toHaveBeenCalled();
   });
 });
