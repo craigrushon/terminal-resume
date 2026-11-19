@@ -6,6 +6,7 @@ import { ViewTabs } from '../components/ViewTabs';
 import { DetailSwitch } from '../components/DetailSwitch';
 import { ThemeSwitch } from '../components/ThemeSwitch';
 import ResumeView from '../components/ResumeView.astro';
+import { pageMeta, personJsonLd, serializeJsonLd } from '../lib/seo';
 import '../styles/themes.css';
 import '../styles/tokens.css';
 import '../styles/terminal.css';
@@ -13,7 +14,8 @@ import '../styles/views.css';
 import '../styles/print.css';
 
 const { basics } = resume;
-const title = `${basics.name}: ${basics.label}`;
+const meta = pageMeta(resume, Astro.site!, { isExample: isExampleContent });
+const jsonLd = serializeJsonLd(personJsonLd(resume, Astro.site!));
 ---
 <!doctype html>
 <html lang="en" data-theme="modern">
@@ -21,10 +23,26 @@ const title = `${basics.name}: ${basics.label}`;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script is:inline set:html={`(${prepaint.toString()})({search: location.search, storage: (function(){try{return localStorage}catch(e){return null}})(), width: innerWidth, root: document.documentElement})`} />
-    <title>{title}</title>
-    <meta name="description" content={basics.summary} />
-    <link rel="canonical" href={new URL('/', Astro.site)} />
-    {isExampleContent && <meta name="robots" content="noindex" />}
+    <title>{meta.title}</title>
+    <meta name="description" content={meta.description} />
+    <link rel="canonical" href={meta.canonical} />
+    {meta.noindex && <meta name="robots" content="noindex" />}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={basics.name} />
+    <meta property="og:title" content={meta.title} />
+    <meta property="og:description" content={meta.description} />
+    <meta property="og:url" content={meta.canonical} />
+    <meta property="og:image" content={meta.ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={meta.ogImageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={meta.title} />
+    <meta name="twitter:description" content={meta.description} />
+    <meta name="twitter:image" content={meta.ogImage} />
+    <meta name="theme-color" content="#1e1e2e" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script type="application/ld+json" is:inline set:html={jsonLd} />
   </head>
   <body>
     <header class="site-header">
