@@ -52,16 +52,28 @@ Resume {
 - In **Concise** mode, each item shows `summary` and the first 3 highlights. **Verbose** mode shows everything, including the `*Verbose` fields.
 
 ## 5. Views and toggles
-**Header (both views):** name and title, plus three controls and a download link:
-- **View:** `Terminal | Resume`. This is a native control (radio group styled as a segmented button).
-- **Detail:** `Concise | Verbose`
-- **Theme:** `Classic | Modern` (see §6a)
-- **Download PDF** link (see §6b)
+**Layout: a terminal-app window (redesigned 2026-11-19, replaces the header radio groups).**
+```
+Craig Rushon
+Senior Software Engineer
+┌ ● ● ●  [ >_ Terminal ]  [ ▤ Resume ]                    ⚙ ┐
+│ (Terminal tab)  visitor@craigrushon:~$ █                   │
+│ (Resume tab)    Detail: [ Concise | Detailed ]    ⤓ PDF    │
+│                 …resume…                                   │
+└────────────────────────────────────────────────────────────┘
+```
+- **Name and title** stay above the window (the page's `h1`).
+- **Title bar:** three decorative dots (`aria-hidden`, hidden on phones), then the **View tabs**, then a **⚙ settings** button on the right.
+- **View tabs** (always visible): `Terminal` and `Resume`, following the WAI-ARIA tabs pattern: `role="tablist"` labelled "View", `role="tab"` with `aria-selected` and `aria-controls`, roving `tabindex`, and ←/→/Home/End that move focus *and* select (automatic activation). The two `<section>`s are `role="tabpanel"` labelled by their tab. Text labels are kept next to the icons.
+- **Settings popover (⚙):** the browser's native Popover API (`popovertarget`, light dismiss, Escape). It contains the **Theme** group (`Modern | Classic`), framed as the terminal "profile".
+- **Resume toolbar** (only inside the Resume tab): a global **Detail** switch `Concise | Detailed` (values `concise`/`verbose`; the terminal keeps `verbose`/`-v`), and a **⤓ PDF** link that is always visible there. In the Terminal tab, detail is controlled by commands only and `download` gets the PDF.
+- **Without JavaScript:** the Resume tab content shows; the tabs, ⚙ and Detail switch are hidden (they can't work). The PDF link still works.
+- Icons are small inline SVGs (no icon library). Keyboard shortcuts: not now.
 
 **Rules**
 - **Default view:** **Terminal on desktop, Resume on phones** (viewport under 640px). Priority: `?view=` in the URL, then the last choice saved in `localStorage`, then the viewport default.
 - The static HTML can't know the viewport, so a tiny inline script in `<head>` picks the view and sets `data-view` on `<html>` **before the first paint**. That avoids a flash of the wrong view. This script is the only code that runs before the island loads.
-- Toggles update the URL (`?view=resume&detail=verbose`), so a link to a specific view can be shared, e.g. sent to a recruiter.
+- Tabs and switches update the URL (`?view=resume&detail=verbose`), so a link to a specific view can be shared, e.g. sent to a recruiter.
 - **Without JavaScript**, the Resume view renders and the terminal is hidden. The resume is always in the HTML, so search engines and screen readers get the full content.
 - On narrow screens (under 640px), the terminal shows **command suggestion chips** above the input so phone users can tap commands instead of typing.
 
