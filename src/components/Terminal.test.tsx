@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import example from '../../content/resume.example.json';
@@ -175,6 +175,29 @@ describe('Terminal', () => {
     await run('pwd');
     await user.keyboard('{ArrowUp}');
     expect(input).toHaveValue('pwd');
+  });
+
+  // Review of milestone 3: refocusing must not steal clicks on links or interrupt text selection.
+  it('does not move focus to the input when a link in the log is clicked', async () => {
+    const { input, user } = setup();
+    await user.type(input, 'cat contact{Enter}');
+    const link = screen.getByRole('link', { name: 'https://github.com/alex-example' });
+    link.addEventListener('click', (event) => event.preventDefault()); // jsdom: don't navigate
+    await user.click(link);
+    expect(input).not.toHaveFocus();
+  });
+
+  it('does not move focus to the input while text in the log is selected', () => {
+    const { input, log } = setup();
+    const range = document.createRange();
+    range.selectNodeContents(log);
+    window.getSelection()?.removeAllRanges(); // addRange is ignored if a range already exists
+    window.getSelection()?.addRange(range);
+    expect(window.getSelection()?.isCollapsed).toBe(false);
+    // fireEvent, not user.click: user-event's pointer press would collapse the selection itself.
+    fireEvent.click(log);
+    expect(input).not.toHaveFocus();
+    window.getSelection()?.removeAllRanges();
   });
 
   it('focuses the input when the log is clicked', async () => {

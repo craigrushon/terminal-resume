@@ -1,0 +1,106 @@
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.terminal {
+  max-width: 48rem;
+  margin: var(--space-4) auto 0;
+  padding: var(--space-4);
+  background: var(--bg);
+  border: 1px solid var(--muted);
+  border-radius: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+}
+
+.terminal-log {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.terminal-log p,
+.terminal-log h3,
+.terminal-log ul {
+  margin: 0 0 var(--space-2);
+}
+
+.terminal-log h3 { font-size: 1em; color: var(--accent); }
+.terminal-log ul { padding-left: 1.25rem; }
+.terminal-log a { color: var(--accent); }
+.terminal-log .echo { color: var(--muted); white-space: pre-wrap; overflow-wrap: anywhere; }
+.terminal-log .error { color: var(--error); }
+.terminal-log .options { color: var(--muted); }
+
+.terminal-input {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  margin-top: var(--space-2);
+}
+
+.prompt { color: var(--accent); white-space: nowrap; }
+
+/* The native caret is replaced by a blinking block via caret-color + animation on the field's border-free box. */
+.terminal-input input {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-1) 0;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  caret-color: var(--accent);
+  caret-shape: block;
+  outline: none;
+}
+
+.terminal-input:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 0.25rem;
+}
+
+.terminal-input input:focus { animation: caret-blink 1.06s step-end infinite; }
+
+@keyframes caret-blink {
+  50% { caret-color: transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .terminal-input input:focus { animation: none; }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.chips button {
+  padding: var(--space-1) var(--space-2);
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.85rem;
+  min-height: 2.75rem; /* 44px touch target */
+  border: 1px solid var(--muted);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.chips button:hover { border-color: var(--accent); color: var(--accent); }
+.chips button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (min-width: 640px) {
+  .chips { display: none; }
+}

@@ -10,6 +10,7 @@
   --fg: #cdd6f4;
   --muted: #a6adc8;
   --accent: #89b4fa;
+  --error: #f38ba8; /* ~7.5:1 on --bg */
 }
 
 body {

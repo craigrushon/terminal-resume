@@ -1,6 +1,8 @@
 ---
 import { isExampleContent, resume } from '../lib/resume/source';
+import { Terminal } from '../components/Terminal';
 import '../styles/tokens.css';
+import '../styles/terminal.css';
 
 const { basics } = resume;
 const title = `${basics.name}: ${basics.label}`;
@@ -20,7 +22,10 @@ const title = `${basics.name}: ${basics.label}`;
       <h1>{basics.name}</h1>
       <p class="label">{basics.label}</p>
       <p>{basics.summary}</p>
-      <p class="muted">Scaffold (milestone 1). Terminal and resume views arrive in milestones 3–4.</p>
     </main>
+    <Terminal client:idle resume={resume} />
+    <noscript>
+      <p class="muted">The interactive terminal needs JavaScript. A plain resume view is coming in milestone 4.</p>
+    </noscript>
   </body>
 </html>
