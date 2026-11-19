@@ -25,3 +25,5 @@ jobs:
         run: pnpm check
       - name: Build (example content)
         run: pnpm build
+      - name: Built output checks
+        run: pnpm test:dist
