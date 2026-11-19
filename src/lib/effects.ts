@@ -59,6 +59,11 @@ function setPref(env: EffectEnv, key: keyof typeof PREF_KEYS, value: string): vo
   } catch {
     // Storage can throw (private mode, quota); the pref still applies for this page.
   }
+  try {
+    env.setParam(key, value);
+  } catch {
+    // URL mirroring is best effort (e.g. sandboxed contexts can throw on replaceState).
+  }
   env.dispatch(new CustomEvent(PREFS_EVENT, { detail: { [key]: value } }));
 }
 

@@ -2,6 +2,8 @@
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { hydrateRoot, type Root } from 'react-dom/client';
+import { renderToString } from 'react-dom/server';
 import { PREFS_EVENT } from '../lib/effects';
 import { Toggles, type TogglesProps } from './Toggles';
 
@@ -71,5 +73,36 @@ describe('Toggles', () => {
     await user.keyboard('{ArrowRight}');
     expect(within(detail).getByRole('radio', { name: 'Verbose' })).toBeChecked();
     expect(onEffect).toHaveBeenCalledWith({ type: 'set-detail', detail: 'verbose' });
+  });
+});
+
+// Review of milestone 4: the server can't see <html data-*> prefs, so the first client render must match the
+// server's defaults and sync afterwards; otherwise React reports a hydration mismatch.
+describe('Toggles hydration', () => {
+  it('hydrates server markup without a mismatch when <html> prefs differ from the defaults', async () => {
+    const container = document.createElement('div');
+    container.innerHTML = renderToString(<Toggles onEffect={vi.fn()} />); // no data-* yet: server defaults
+    document.body.appendChild(container);
+    document.documentElement.dataset.view = 'resume';
+    document.documentElement.dataset.detail = 'verbose';
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const recoverable: unknown[] = [];
+    let root: Root | undefined;
+    try {
+      await act(async () => {
+        root = hydrateRoot(container, <Toggles onEffect={vi.fn()} />, { onRecoverableError: (error) => recoverable.push(error) });
+      });
+      expect(consoleError).not.toHaveBeenCalled();
+      expect(recoverable).toEqual([]);
+      // ...and it still ends up showing the pre-paint prefs.
+      expect(within(container).getByRole('radio', { name: 'Resume' })).toBeChecked();
+      expect(within(container).getByRole('radio', { name: 'Verbose' })).toBeChecked();
+    } finally {
+      act(() => root?.unmount());
+      container.remove();
+      consoleError.mockRestore();
+      delete document.documentElement.dataset.view;
+      delete document.documentElement.dataset.detail;
+    }
   });
 });

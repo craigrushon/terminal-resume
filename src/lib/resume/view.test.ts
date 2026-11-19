@@ -66,7 +66,7 @@ const EXPECTED: ResumeView = {
       highlights: ['Pinned the ROI maths with independently recomputed characterization tests'],
       stack: ['Next.js', 'TypeScript', 'Prisma', 'Vitest'],
       link: {
-        label: 'https://github.com/alex-example/property-roi',
+        label: 'Source code: Property ROI Calculator', // review: readable link text, not the raw URL
         href: 'https://github.com/alex-example/property-roi',
       },
     },
@@ -76,7 +76,7 @@ const EXPECTED: ResumeView = {
       highlights: ['Three merged pull requests at under one dollar each, with human approval gates'],
       stack: ['TypeScript', 'LLM agents', 'Linear API'],
       link: {
-        label: 'https://github.com/alex-example/agent-workflow',
+        label: 'Source code: Agent workflow',
         href: 'https://github.com/alex-example/agent-workflow',
       },
     },
@@ -99,6 +99,11 @@ const EXPECTED: ResumeView = {
 describe('buildResumeView', () => {
   it('builds the whole view for the example resume', () => {
     expect(buildResumeView(resume)).toEqual(EXPECTED);
+  });
+
+  it('labels a project website (url without repo) by name', () => {
+    const withSite: Resume = { ...resume, projects: [{ name: 'Demo', description: 'd', url: 'https://demo.example.com', highlights: [], stack: [] }] };
+    expect(buildResumeView(withSite).projects[0]?.link).toEqual({ label: 'Website: Demo', href: 'https://demo.example.com' });
   });
 
   it('drops unsafe profile and project links', () => {
